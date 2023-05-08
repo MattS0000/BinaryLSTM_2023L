@@ -8,6 +8,8 @@ BLLM: https://aclanthology.org/N18-1192/
 
 Maybe something can be found here: https://paperswithcode.com/paper/multi-level-binarized-lstm-in-eeg
 
+BNN overview 2023: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10072399
+
 BNN Explanations:
 
 https://mohitjain.me/2018/07/14/bnn/

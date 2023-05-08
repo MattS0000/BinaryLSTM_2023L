@@ -16,9 +16,9 @@ https://www.youtube.com/watch?v=5K6ko3H_ePg
 
 Packages to check:
 
-https://github.com/1adrianb/binary-networks-pytorch
+https://github.com/1adrianb/binary-networks-pytorch - torch
 
-https://docs.larq.dev/larq/
+https://docs.larq.dev/larq/ - keras
 
 \/ Articles authors
 

@@ -11,6 +11,7 @@ Maybe something can be found here: https://paperswithcode.com/paper/multi-level-
 BNN overview 2023: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=10072399
 
 Smthing similar maybe: https://arxiv.org/abs/2202.06483, has code
+
 Binarized GRU: https://paperswithcode.com/paper/incremental-binarization-on-recurrent-neural, no code :(
 
 binarized lstm: https://cs224d.stanford.edu/reports/weiyi.pdf

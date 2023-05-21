@@ -129,6 +129,7 @@ class BinaryLSTMCell(DropoutRNNCellMixin, base_layer.BaseRandomLayer):
         kernel_initializer="glorot_uniform",
         recurrent_initializer="orthogonal",
         bias_initializer="zeros",
+        gamma_initializer="normal",
         unit_forget_bias=True,
         kernel_regularizer=None,
         recurrent_regularizer=None,
@@ -163,6 +164,7 @@ class BinaryLSTMCell(DropoutRNNCellMixin, base_layer.BaseRandomLayer):
         self.kernel_initializer = initializers.get(kernel_initializer)
         self.recurrent_initializer = initializers.get(recurrent_initializer)
         self.bias_initializer = initializers.get(bias_initializer)
+        self.gamma_initializer = initializers.get(gamma_initializer)
         self.unit_forget_bias = unit_forget_bias
 
         self.kernel_regularizer = regularizers.get(kernel_regularizer)
@@ -237,9 +239,7 @@ class BinaryLSTMCell(DropoutRNNCellMixin, base_layer.BaseRandomLayer):
             self.gamma = self.add_weight(#NEW
                 shape=(self.units * 4,),
                 name="gamma",
-                initializer=bias_initializer,
-                regularizer=self.bias_regularizer,
-                constraint=self.bias_constraint,
+                initializer=self.gamma_initializer,
                 caching_device=default_caching_device,
             )
         else:
@@ -511,6 +511,7 @@ class BinaryLSTM(DropoutRNNCellMixin, RNN, base_layer.BaseRandomLayer):
         kernel_initializer="glorot_uniform",
         recurrent_initializer="orthogonal",
         bias_initializer="zeros",
+        gamma_initializer="normal",
         unit_forget_bias=True,
         kernel_regularizer=None,
         recurrent_regularizer=None,
@@ -554,6 +555,7 @@ class BinaryLSTM(DropoutRNNCellMixin, RNN, base_layer.BaseRandomLayer):
             recurrent_initializer=recurrent_initializer,
             unit_forget_bias=unit_forget_bias,
             bias_initializer=bias_initializer,
+            gamma_initializer=gamma_initializer,
             kernel_regularizer=kernel_regularizer,
             recurrent_regularizer=recurrent_regularizer,
             bias_regularizer=bias_regularizer,
@@ -966,9 +968,11 @@ def standard_lstm(
         value is for testing purpose and should be used by user.
     """
     input_shape = backend.int_shape(inputs)
+    H = input_shape[-1] #NEW
+    scale = tf.constant((1/H)**0.5) #NEW
     timesteps = input_shape[0] if time_major else input_shape[1]
-    quant_kernel = ste_sign(kernel)#NEW
-    quant_recurrent_kernel = ste_sign(recurrent_kernel)#NEW
+    quant_kernel = ste_sign(kernel)*scale#NEW
+    quant_recurrent_kernel = ste_sign(recurrent_kernel)*scale#NEW
 
     def step(cell_inputs, cell_states):
         """Step function that will be used by Keras RNN backend."""
@@ -981,12 +985,12 @@ def standard_lstm(
 
         z0, z1, z2, z3 = tf.split(z, 4, axis=1)
 
-        i = ste_sign(tf.sigmoid(z0))#NEW
-        f = ste_sign(tf.sigmoid(z1))#NEW
-        c = ste_sign(f * c_tm1 + i * tf.tanh(z2))#NEW
-        o = ste_sign(tf.sigmoid(z3))#NEW
+        i = tf.sigmoid(z0)#ste_sign(tf.sigmoid(z0))#NEW
+        f = tf.sigmoid(z1)#ste_sign(tf.sigmoid(z1))#NEW
+        c = f * c_tm1 + i * tf.tanh(z2)#ste_sign(f * c_tm1 + i * tf.tanh(z2))#NEW
+        o = tf.sigmoid(z3)#ste_sign(tf.sigmoid(z3))#NEW
 
-        h = ste_sign(o * tf.tanh(c))#NEW
+        h = o * tf.tanh(c)#ste_sign(o * tf.tanh(c))#NEW
         return h, [h, c]
 
     last_output, outputs, new_states = backend.rnn(

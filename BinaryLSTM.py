@@ -236,7 +236,7 @@ class BinaryLSTMCell(DropoutRNNCellMixin, base_layer.BaseRandomLayer):
                 constraint=self.bias_constraint,
                 caching_device=default_caching_device,
             )
-            self.gamma = self.add_weight(#NEW
+            self.gamma = self.add_weight( 
                 shape=(self.units * 4,),
                 name="gamma",
                 initializer=self.gamma_initializer,
@@ -705,7 +705,7 @@ class BinaryLSTM(DropoutRNNCellMixin, RNN, base_layer.BaseRandomLayer):
                         self.cell.recurrent_kernel
                     ),
                     "bias": gru_lstm_utils.read_variable_value(self.cell.bias),
-                    "gamma": gru_lstm_utils.read_variable_value(self.cell.gamma), #NEW
+                    "gamma": gru_lstm_utils.read_variable_value(self.cell.gamma),  
                     "mask": mask,
                     "time_major": self.time_major,
                     "go_backwards": self.go_backwards,
@@ -908,7 +908,7 @@ def standard_lstm(
     kernel,
     recurrent_kernel,
     bias,
-    gamma,#NEW
+    gamma, 
     mask,
     time_major,
     go_backwards,
@@ -968,29 +968,29 @@ def standard_lstm(
         value is for testing purpose and should be used by user.
     """
     input_shape = backend.int_shape(inputs)
-    H = input_shape[-1] #NEW
-    scale = tf.constant((1/H)**0.5) #NEW
+    H = input_shape[-1]  
+    scale = tf.constant((1/H)**0.5)  
     timesteps = input_shape[0] if time_major else input_shape[1]
-    quant_kernel = ste_sign(kernel)*scale#NEW
-    quant_recurrent_kernel = ste_sign(recurrent_kernel)*scale#NEW
+    quant_kernel = ste_sign(kernel)*scale 
+    quant_recurrent_kernel = ste_sign(recurrent_kernel)*scale 
 
     def step(cell_inputs, cell_states):
         """Step function that will be used by Keras RNN backend."""
         h_tm1 = cell_states[0]  # previous memory state
         c_tm1 = cell_states[1]  # previous carry state
-        z = backend.dot(cell_inputs, quant_kernel)#NEW
-        z += backend.dot(h_tm1, quant_recurrent_kernel)#NEW
-        z *= tf.math.exp(gamma)#NEW
+        z = backend.dot(cell_inputs, quant_kernel) 
+        z += backend.dot(h_tm1, quant_recurrent_kernel) 
+        z *= tf.math.exp(gamma) 
         z = backend.bias_add(z, bias)
 
         z0, z1, z2, z3 = tf.split(z, 4, axis=1)
 
-        i = tf.sigmoid(z0)#ste_sign(tf.sigmoid(z0))#NEW
-        f = tf.sigmoid(z1)#ste_sign(tf.sigmoid(z1))#NEW
-        c = f * c_tm1 + i * tf.tanh(z2)#ste_sign(f * c_tm1 + i * tf.tanh(z2))#NEW
-        o = tf.sigmoid(z3)#ste_sign(tf.sigmoid(z3))#NEW
+        i = tf.sigmoid(z0)
+        f = tf.sigmoid(z1)
+        c = f * c_tm1 + i * tf.tanh(z2)
+        o = tf.sigmoid(z3)
 
-        h = o * tf.tanh(c)#ste_sign(o * tf.tanh(c))#NEW
+        h = o * tf.tanh(c)
         return h, [h, c]
 
     last_output, outputs, new_states = backend.rnn(
@@ -1194,7 +1194,7 @@ def lstm_with_backend_selection(
     kernel,
     recurrent_kernel,
     bias,
-    gamma,#NEW
+    gamma, 
     mask,
     time_major,
     go_backwards,
@@ -1247,7 +1247,7 @@ def lstm_with_backend_selection(
         "kernel": kernel,
         "recurrent_kernel": recurrent_kernel,
         "bias": bias,
-        "gamma": gamma,#NEW
+        "gamma": gamma, 
         "mask": mask,
         "time_major": time_major,
         "go_backwards": go_backwards,
@@ -1263,7 +1263,7 @@ def lstm_with_backend_selection(
         kernel,
         recurrent_kernel,
         bias,
-        gamma,#NEW
+        gamma, 
         mask,
         time_major,
         go_backwards,
@@ -1296,7 +1296,7 @@ def lstm_with_backend_selection(
                 kernel=kernel,
                 recurrent_kernel=recurrent_kernel,
                 bias=bias,
-                gamma=gamma,#NEW
+                gamma=gamma, 
                 mask=mask,
                 time_major=time_major,
                 go_backwards=go_backwards,
